@@ -1,39 +1,43 @@
-name: Run Cypress Tests on Windows + Chrome
+name: 🧪 CI Tests
 
+# Triggers the workflow on pushes and pull requests to your main branch
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   test:
-    runs-on: windows-latest
+    # Use the latest Ubuntu environment
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    # Check out your repository code
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
+    # Set up the Node.js environment
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20' # Use a stable Node.js version, adjust as needed
 
-      - name: Install dependencies
-        run: npm ci
+    # Install dependencies
+    - name: Install dependencies
+      run: npm ci # or npm install/yarn install
 
-      - name: Check Node.js, npm, and Cypress version
-        run: |
-          node -v
-          npm -v
-          npx cypress -v
+    # Run your test command
+    - name: Run tests
+      run: npm test # or your specific test script (e.g., npm run cypress:run)
 
-      - name: Run Cypress tests (headless)
-        run: npx cypress run --browser chrome --headless
-
-      - name: Upload Cypress artifacts
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: cypress-artifacts
-          path: cypress/videos,cypress/screenshots
+    # 💾 (Optional) Upload test results/artifacts for review
+    - name: Upload artifacts (e.g., screenshots, reports)
+      uses: actions/upload-artifact@v4
+      if: always() # Run this step even if the previous one failed
+      with:
+        name: test-reports
+        path: |
+          cypress/videos
+          cypress/screenshots
+          # Add paths to any other reports you generate
