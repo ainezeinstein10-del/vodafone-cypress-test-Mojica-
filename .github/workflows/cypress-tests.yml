@@ -11,40 +11,27 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Node.js (match your local version)
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
 
-      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Debug: Check versions
-      - name: Check Node.js version
-        run: node -v
+      - name: Check Node.js, npm, and Cypress version
+        run: |
+          node -v
+          npm -v
+          npx cypress -v
 
-      - name: Check npm version
-        run: npm -v
-
-      - name: Check Cypress version
-        run: npx cypress -v
-
-      # 5️⃣ Run Cypress tests headless first
       - name: Run Cypress tests (headless)
         run: npx cypress run --browser chrome --headless
 
-      # 6️⃣ Optional: Run headed mode (uncomment if headless passes)
-      # - name: Run Cypress tests (headed)
-      #   run: npx cypress run --browser chrome --headed
-
-      # 7️⃣ Upload artifacts if tests fail
-      - name: Upload Cypress videos and screenshots
+      - name: Upload Cypress artifacts
         if: failure()
         uses: actions/upload-artifact@v3
         with:
