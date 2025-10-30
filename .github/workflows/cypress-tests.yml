@@ -1,3 +1,4 @@
+
 name: 🧪 CI Tests
 
 # Triggers the workflow on pushes and pull requests to your main branch
@@ -8,36 +9,40 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    # Use the latest Ubuntu environment
+  cypress-run:
+    # Cypress officially recommends using an Ubuntu runner for better performance and stability
     runs-on: ubuntu-latest
-
+    
     steps:
-    # Check out your repository code
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      # Check out your repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # Set up the Node.js environment
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20' # Use a stable Node.js version, adjust as needed
+      # --- This single step replaces manual Node setup, dependency install, and test run ---
+      # This action automatically installs npm dependencies, caches Cypress, 
+      # and runs the tests using the 'cypress run' command.
+      - name: Cypress run
+        uses: cypress-io/github-action@v6 
+        with:
+          # If your app needs to be built before running, uncomment the 'build' line:
+          # build: npm run build
+          
+          # If your app needs a server running, uncomment and adjust the 'start' and 'wait-on' lines:
+          # start: npm start # or 'npm run dev' or whatever starts your application server
+          # wait-on: 'http://localhost:3000' # Change the port if your app runs on a different one
 
-    # Install dependencies
-    - name: Install dependencies
-      run: npm ci # or npm install/yarn install
+          # Explicitly running Chrome, which is necessary if you want to test outside of Electron
+          browser: chrome 
+          
+          # If you have custom test commands, use the command property:
+          # command: npm run test:ci 
 
-    # Run your test command
-    - name: Run tests
-      run: npm test # or your specific test script (e.g., npm run cypress:run)
+      # 💾 Upload test results/artifacts for review (videos and screenshots of failed tests)
+      - name: Upload artifacts (e.g., screenshots, reports)
+        with:
+          name: cypress-artifacts
+          path: |
+            cypress/videos
+            cypress/screenshots
+          retention-days: 7
 
-    # 💾 (Optional) Upload test results/artifacts for review
-    - name: Upload artifacts (e.g., screenshots, reports)
-      uses: actions/upload-artifact@v4
-      if: always() # Run this step even if the previous one failed
-      with:
-        name: test-reports
-        path: |
-          cypress/videos
-          cypress/screenshots
-          # Add paths to any other reports you generate
