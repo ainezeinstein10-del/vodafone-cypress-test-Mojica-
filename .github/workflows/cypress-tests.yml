@@ -1,4 +1,4 @@
-name: CI Tests
+name: 🧪 CI Tests
 
 # Triggers the workflow on pushes and pull requests to your main branch
 on:
@@ -9,8 +9,10 @@ on:
 
 jobs:
   cypress-run:
+    # Set a timeout for the entire job (e.g., 15 minutes) to prevent long-running or hung jobs
+    timeout-minutes: 15
     # Cypress officially recommends using an Ubuntu runner for better performance and stability
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     
     steps:
       # Check out your repository code
@@ -28,7 +30,7 @@ jobs:
           
           # If your app needs a server running, uncomment and adjust the 'start' and 'wait-on' lines:
           start: npm start # or 'npm run dev' or whatever starts your application server
-          wait-on: 'http://localhost:3000' # Change the port if your app runs on a different one
+          # IMPORTANT: Double-check your package.json to ensure the 'start' script correctly serves your built app.
 
           # Explicitly running Chrome, which is necessary if you want to test outside of Electron
           browser: chrome 
