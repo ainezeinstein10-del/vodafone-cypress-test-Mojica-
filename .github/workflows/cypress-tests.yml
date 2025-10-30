@@ -1,5 +1,4 @@
-
-name: 🧪 CI Tests
+name: CI Tests
 
 # Triggers the workflow on pushes and pull requests to your main branch
 on:
@@ -25,11 +24,11 @@ jobs:
         uses: cypress-io/github-action@v6 
         with:
           # If your app needs to be built before running, uncomment the 'build' line:
-          # build: npm run build
+          build: npm run build
           
           # If your app needs a server running, uncomment and adjust the 'start' and 'wait-on' lines:
-          # start: npm start # or 'npm run dev' or whatever starts your application server
-          # wait-on: 'http://localhost:3000' # Change the port if your app runs on a different one
+          start: npm start # or 'npm run dev' or whatever starts your application server
+          wait-on: 'http://localhost:3000' # Change the port if your app runs on a different one
 
           # Explicitly running Chrome, which is necessary if you want to test outside of Electron
           browser: chrome 
@@ -39,10 +38,11 @@ jobs:
 
       # 💾 Upload test results/artifacts for review (videos and screenshots of failed tests)
       - name: Upload artifacts (e.g., screenshots, reports)
+        uses: actions/upload-artifact@v4
+        if: always() # Run this step even if the previous one failed
         with:
           name: cypress-artifacts
           path: |
             cypress/videos
             cypress/screenshots
           retention-days: 7
-
