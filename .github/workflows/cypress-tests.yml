@@ -1,11 +1,11 @@
-name: ci Tests
+name: 🧪 CI Tests
 
-# Triggers the workflow on pushes and pull requests to your main branch
+# Triggers the workflow on pushes and pull requests to your master branch
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   cypress-run:
@@ -34,7 +34,8 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        run: npm ci
+        # Changed from npm ci to npm install for broader compatibility on CI environments
+        run: npm install
 
       # ⚙️ Build the application separately
       - name: Build Application
@@ -44,13 +45,10 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v6 
         with:
-          # Build step is now handled above
-          # build: npm run build
+          # We use `start-windows` to ensure the command runs correctly on the Windows runner
+          # The `npm start` command will be run in the background.
+          start-windows: npm start 
           
-          # If your app needs a server running, uncomment and adjust the 'start' and 'wait-on' lines:
-          start: npm start # or 'npm run dev' or whatever starts your application server
-          # IMPORTANT: Double-check your package.json to ensure the 'start' script correctly serves your built app.
-
           # Explicitly running Chrome, which is necessary if you want to test outside of Electron
           browser: chrome 
           
