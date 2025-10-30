@@ -4,5 +4,3 @@ describe('CI Workflow Test', () => {
     expect(true).to.equal(true)
   })
 })
-
-
