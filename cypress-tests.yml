@@ -1,4 +1,4 @@
-name: 🧪 CI Tests
+name: CI Tests
 
 # Trigger workflow on push or pull request to master
 on:
@@ -52,20 +52,11 @@ jobs:
           mkdir -p cypress/videos
           mkdir -p cypress/screenshots
 
-      # 7️⃣ Run Cypress tests (job won’t fail the workflow even if tests fail)
+      # 7️⃣ Run Cypress tests directly (no server needed)
       - name: Cypress run
         uses: cypress-io/github-action@v6
         continue-on-error: true
         with:
-          # Serve the built app if exists, otherwise fallback to npm start
-          start: |
-            if npm run | findstr build; then
-              npx serve -s build -l 3000
-            else
-              npm start
-            fi
-          wait-on: 'http://localhost:3000'
-          wait-on-timeout: 60
           browser: chrome
 
       # 8️⃣ Upload Cypress artifacts (screenshots and videos)
