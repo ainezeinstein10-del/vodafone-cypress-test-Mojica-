@@ -1,4 +1,4 @@
-name: 🧪 CI Tests
+name: ci Tests
 
 # Triggers the workflow on pushes and pull requests to your main branch
 on:
@@ -11,22 +11,41 @@ jobs:
   cypress-run:
     # Set a timeout for the entire job (e.g., 15 minutes) to prevent long-running or hung jobs
     timeout-minutes: 15
-    # Cypress officially recommends using an Ubuntu runner for better performance and stability
+    # Running on Windows as requested to match the testing environment
     runs-on: windows-latest
     
     steps:
       # Check out your repository code
       - name: Checkout repository
         uses: actions/checkout@v4
+      
+      # 📦 Setup Node and Cache Dependencies
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Specify a stable Node.js version
+          
+      - name: Restore node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      # --- This single step replaces manual Node setup, dependency install, and test run ---
-      # This action automatically installs npm dependencies, caches Cypress, 
-      # and runs the tests using the 'cypress run' command.
+      - name: Install dependencies
+        run: npm ci
+
+      # ⚙️ Build the application separately
+      - name: Build Application
+        run: npm run build # This assumes 'npm run build' is defined in your package.json
+
+      # --- This single step runs Cypress using the built app and server ---
       - name: Cypress run
         uses: cypress-io/github-action@v6 
         with:
-          # If your app needs to be built before running, uncomment the 'build' line:
-          build: npm run build
+          # Build step is now handled above
+          # build: npm run build
           
           # If your app needs a server running, uncomment and adjust the 'start' and 'wait-on' lines:
           start: npm start # or 'npm run dev' or whatever starts your application server
