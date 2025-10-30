@@ -1,0 +1,73 @@
+name: 🧪 CI Tests
+
+# Trigger workflow on push or pull request to master
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  cypress-run:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # 3️⃣ Restore dependencies cache
+      - name: Restore node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # 4️⃣ Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 5️⃣ Optional: Build the application if `build` script exists
+      - name: Build Application (if available)
+        run: |
+          if npm run | findstr build; then
+            echo "Build script found, running npm run build..."
+            npm run build
+          else
+            echo "No build script found, skipping build."
+          fi
+
+      # 6️⃣ Cypress tests
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          # If you built the app, serve it. Otherwise, fallback to npm start
+          start: |
+            if npm run | findstr build; then
+              npx serve -s build -l 3000
+            else
+              npm start
+            fi
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 60
+          browser: chrome
+
+      # 7️⃣ Upload Cypress artifacts (screenshots, videos)
+      - name: Upload Cypress artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-artifacts
+          path: |
+            cypress/videos
+            cypress/screenshots
+          retention-days: 7
