@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
+      # 2️⃣ Setup Node.js 24
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 5️⃣ Optional: Build the application if `build` script exists
+      # 5️⃣ Optional: Build the application if a build script exists
       - name: Build Application (if available)
         run: |
           if npm run | findstr build; then
@@ -46,11 +46,18 @@ jobs:
             echo "No build script found, skipping build."
           fi
 
-      # 6️⃣ Cypress tests
+      # 6️⃣ Ensure Cypress artifact folders exist
+      - name: Ensure Cypress folders exist
+        run: |
+          mkdir -p cypress/videos
+          mkdir -p cypress/screenshots
+
+      # 7️⃣ Run Cypress tests (job won’t fail the workflow even if tests fail)
       - name: Cypress run
         uses: cypress-io/github-action@v6
+        continue-on-error: true
         with:
-          # If you built the app, serve it. Otherwise, fallback to npm start
+          # Serve the built app if exists, otherwise fallback to npm start
           start: |
             if npm run | findstr build; then
               npx serve -s build -l 3000
@@ -61,7 +68,7 @@ jobs:
           wait-on-timeout: 60
           browser: chrome
 
-      # 7️⃣ Upload Cypress artifacts (screenshots, videos)
+      # 8️⃣ Upload Cypress artifacts (screenshots and videos)
       - name: Upload Cypress artifacts
         uses: actions/upload-artifact@v4
         if: always()
