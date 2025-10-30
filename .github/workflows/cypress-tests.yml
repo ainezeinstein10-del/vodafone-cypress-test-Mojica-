@@ -4,6 +4,49 @@ on:
   push:
     branches: [ master ]
   pull_request:
+name: Run Cypress Tests on Windows + Chrome
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # 2.1️⃣ Verify Node.js and npm
+        run: npm ci
+
+      # 4️⃣ Run Cypress tests in headed Chrome
+      # 5️⃣ Optional: Save screenshots and videos if tests fail
+      - name: Upload Cypress videos and screenshots
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-artifacts
+          path: cypress/videos,cypress/screenshots
+      - name: Run Cypress tests
+        run: npx cypress run --browser chrome --headed
+
+      - name: Check Node.js and npm version
+        run: |
+          node -v
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
     branches: [ master ]
 
 jobs:
@@ -24,3 +67,4 @@ jobs:
 
       - name: Run Cypress tests
         run: npx cypress run
+
