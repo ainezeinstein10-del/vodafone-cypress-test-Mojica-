@@ -34,27 +34,32 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        # Changed from npm ci to npm install for broader compatibility on CI environments
         run: npm install
 
+      # Install 'serve' globally to run the built app reliably
+      - name: Install serve
+        run: npm install -g serve
+        
       # ⚙️ Build the application separately
       - name: Build Application
         run: npm run build # This assumes 'npm run build' is defined in your package.json
-
+        # IMPORTANT: If your build output directory is NOT 'build', you must change it below
+        
       # --- This single step runs Cypress using the built app and server ---
       - name: Cypress run
         uses: cypress-io/github-action@v6 
         with:
-          # We use `start-windows` to ensure the command runs correctly on the Windows runner
-          # The `npm start` command will be run in the background.
-          start-windows: npm start 
+          # Use 'serve' to run the built files from the 'build' directory on port 3000
+          # We use a non-Windows specific 'start' command here because 'serve' is OS agnostic
+          start: serve -s build -l 3000
+          
+          # CRITICAL: Wait for the application server to be ready before running tests
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 60
           
           # Explicitly running Chrome, which is necessary if you want to test outside of Electron
           browser: chrome 
           
-          # If you have custom test commands, use the command property:
-          # command: npm run test:ci 
-
       # 💾 Upload test results/artifacts for review (videos and screenshots of failed tests)
       - name: Upload artifacts (e.g., screenshots, reports)
         uses: actions/upload-artifact@v4
@@ -65,3 +70,4 @@ jobs:
             cypress/videos
             cypress/screenshots
           retention-days: 7
+
